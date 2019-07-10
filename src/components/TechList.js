@@ -1,20 +1,69 @@
 import React, { Component } from 'react';
 
+import TechItem from './TechItem';
+
 class TechList extends Component {
   /* Estado do componente */
   state = {
-    techs: ['Node.js', 'React.js', 'React Native']
+    newTech: '',
+    techs: []
+  };
+
+  /* Este função é executada assim que o comopente aparece em tela. */
+  componentDidMount() {
+    const techs = localStorage.getItem('techs');
+
+    if (techs) {
+      this.setState({ techs: JSON.parse(techs) });
+    }
+  }
+
+  /* Este função é executada sempre que houver alterações nas props ou estado. */
+  componentDidUpdate(_, prevState) {
+    if (prevState.techs !== this.state.techs) {
+      localStorage.setItem('techs', JSON.stringify(this.state.techs));
+    }
+  }
+
+  /* Este função é executada quando o componente deixa de existir. */
+  componentWillUnmount() {}
+
+  handleInputChange = e => {
+    console.log(e.target.value);
+    this.setState({ newTech: e.target.value });
+  };
+
+  handleSubmit = e => {
+    e.preventDefault();
+    this.setState({
+      techs: [...this.state.techs, this.state.newTech],
+      newTech: ''
+    });
+  };
+
+  handleDelete = tech => {
+    this.setState({ techs: this.state.techs.filter(t => t !== tech) });
   };
 
   render() {
-    console.log(this.state);
-
     return (
-      <ul>
-        <li>Node.js</li>
-        <li>React.js</li>
-        <li>React Native</li>
-      </ul>
+      <form onSubmit={this.handleSubmit}>
+        <ul>
+          {this.state.techs.map(tech => (
+            <TechItem
+              key={tech}
+              tech={tech}
+              onDelete={() => this.handleDelete(tech)}
+            />
+          ))}
+        </ul>
+        <input
+          type="text"
+          onChange={this.handleInputChange}
+          value={this.state.newTech}
+        />
+        <button type="submit">Enviar</button>
+      </form>
     );
   }
 }
